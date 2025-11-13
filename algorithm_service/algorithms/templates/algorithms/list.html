@@ -2,16 +2,150 @@
 <html>
 <head>
     <title>Сервис Алгоритмов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .navbar {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-links a {
+            margin-left: 15px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .user-info {
+            color: #666;
+        }
+        /* Остальные стили остаются без изменений */
+        .algorithm {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .add-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .search-form {
+            margin: 20px 0;
+        }
+        .search-input {
+            padding: 8px 12px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .search-button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .tegs {
+            color: #666;
+            font-style: italic;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Доступные алгоритмы</h1>
-    <ul>
-        {% for algorithm in algorithms %}
-            <li>
-                <h2>{{ algorithm.name }}</h2>
-                <p>{{ algorithm.description }}</p>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="nav-links">
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" style="background: none; border: none; color: #007bff; cursor: pointer; text-decoration: underline; padding: 0; font: inherit;">
+                Выйти
+            </button>
+        </form>
+    {% else %}
+        <a href="{% url 'login' %}">Войти</a>
+        <a href="{% url 'register' %}">Регистрация</a>
+    {% endif %}
+</div>
+
+    <h1>Сервис Алгоритмов</h1>
+    
+    <a href="{% url 'add_algorithm' %}" class="add-button">+ Добавить алгоритм</a>
+    
+    <!-- Форма поиска -->
+    <div class="search-form">
+        <form method="get" action="{% url 'algorithm_list' %}">
+            <input type="text" 
+                   name="q" 
+                   value="{{ query|default:'' }}" 
+                   placeholder="Поиск по названию или тегам..." 
+                   class="search-input">
+            <button type="submit" class="search-button">Найти</button>
+            
+            {% if query %}
+                <a href="{% url 'algorithm_list' %}" style="margin-left: 10px; color: #007bff; text-decoration: none;">Очистить поиск</a>
+            {% endif %}
+        </form>
+    </div>
+    
+    <!-- Информация о поиске -->
+    {% if query %}
+        <div style="margin: 10px 0; color: #666;">
+            {% if algorithms %}
+                Найдено алгоритмов: {{ algorithms|length }}
+            {% else %}
+                По запросу "{{ query }}" ничего не найдено.
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <!-- Список алгоритмов -->
+    {% for algorithm in algorithms %}
+        <div class="algorithm">
+            <h2>{{ algorithm.name }}</h2>
+            <div class="tegs">
+                <strong>Теги:</strong> {{ algorithm.tegs }}
+            </div>
+            <p><strong>Описание:</strong> {{ algorithm.description }}</p>
+            
+            {% if algorithm.code %}
+                <strong>Код:</strong>
+                <pre class="code-block">{{ algorithm.code }}</pre>
+            {% endif %}
+        </div>
+    {% empty %}
+        {% if query %}
+            <p>По вашему запросу "{{ query }}" алгоритмов не найдено.</p>
+        {% else %}
+            <p>Алгоритмы пока не добавлены. <a href="{% url 'add_algorithm' %}">Добавить первый алгоритм</a></p>
+        {% endif %}
+    {% endfor %}
 </body>
 </html>
