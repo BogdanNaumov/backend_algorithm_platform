@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Сервис Алгоритмов</title>
+</head>
+<body>
+    <h1>Доступные алгоритмы</h1>
+    <ul>
+        {% for algorithm in algorithms %}
+            <li>
+                <h2>{{ algorithm.name }}</h2>
+                <p>{{ algorithm.description }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
