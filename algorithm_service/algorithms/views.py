@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
 from .models import Algorithm
 from .forms import AlgorithmForm, RegisterForm
 
@@ -13,7 +12,9 @@ def algorithm_list(request):
     if query:
         algorithms = Algorithm.objects.filter(
             Q(name__icontains=query) | 
-            Q(tegs__icontains=query)
+            Q(tegs__icontains=query) |
+            Q(description__icontains=query) |
+            Q(author_name__icontains=query)
         )
     else:
         algorithms = Algorithm.objects.all()
@@ -23,11 +24,15 @@ def algorithm_list(request):
         'query': query
     })
 
+@login_required
 def add_algorithm(request):
     if request.method == 'POST':
         form = AlgorithmForm(request.POST)
         if form.is_valid():
-            form.save()
+            algorithm = form.save(commit=False)
+            algorithm.author_name = request.user.username
+            algorithm.save()
+            messages.success(request, 'Алгоритм успешно добавлен!')
             return redirect('algorithm_list')
     else:
         form = AlgorithmForm()
