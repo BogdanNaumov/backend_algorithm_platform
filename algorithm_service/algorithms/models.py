@@ -5,10 +5,7 @@ class Algorithm(models.Model):
     tegs = models.TextField(default='')
     description = models.TextField()
     code = models.TextField(default='')
-    author_name = models.CharField(
-    max_length=150, 
-    verbose_name='Автор'
-)
+    author_name = models.CharField(max_length=150, verbose_name='Автор')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
