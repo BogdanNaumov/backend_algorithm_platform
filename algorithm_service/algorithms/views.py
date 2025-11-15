@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -21,6 +21,12 @@ def algorithm_list(request):
     return render(request, 'algorithms/list.html', {
         'algorithms': algorithms,
         'query': query
+    })
+
+def algorithm_detail(request, algorithm_id):
+    algorithm = get_object_or_404(Algorithm, id=algorithm_id)
+    return render(request, 'algorithms/algorithm_detail.html', {
+        'algorithm': algorithm
     })
 
 @login_required
