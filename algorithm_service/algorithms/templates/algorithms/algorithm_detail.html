@@ -47,28 +47,32 @@
     
     <!-- Мета-информация -->
     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <div>
-                <strong style="color: #666;">Автор:</strong>
-                <div style="color: #333; margin-top: 5px;">{{ algorithm.author_name }}</div>
-            </div>
-            <div>
-                <strong style="color: #666;">Дата создания:</strong>
-                <div style="color: #333; margin-top: 5px;">
-                    {% timezone "Europe/Moscow" %}
-                        {{ algorithm.created_at|date:"d.m.Y H:i" }}
-                    {% endtimezone %}
-                </div>
-            </div>
-            <div>
-                <strong style="color: #666;">Последнее обновление:</strong>
-                <div style="color: #333; margin-top: 5px;">
-                    {% timezone "Europe/Moscow" %}
-                        {{ algorithm.updated_at|date:"d.m.Y H:i" }}
-                    {% endtimezone %}
-                </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div>
+            <strong style="color: #666;">Автор:</strong>
+            <div style="color: #333; margin-top: 5px;">
+                <a href="{% url 'user_profile' algorithm.author_name %}" style="color: #4CAF50; text-decoration: none;">
+                    {{ algorithm.author_name }}
+                </a>
             </div>
         </div>
+        <div>
+            <strong style="color: #666;">Дата создания:</strong>
+            <div style="color: #333; margin-top: 5px;">
+                {% timezone "Europe/Moscow" %}
+                    {{ algorithm.created_at|date:"d.m.Y H:i" }}
+                {% endtimezone %}
+            </div>
+        </div>
+        <div>
+            <strong style="color: #666;">Последнее обновление:</strong>
+            <div style="color: #333; margin-top: 5px;">
+                {% timezone "Europe/Moscow" %}
+                    {{ algorithm.updated_at|date:"d.m.Y H:i" }}
+                {% endtimezone %}
+            </div>
+        </div>
+    </div>
     </div>
     
     <!-- Действия -->
