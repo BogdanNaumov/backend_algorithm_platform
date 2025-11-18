@@ -18,6 +18,37 @@
             {{ algorithm.name }}
         </h1>
         
+        <!-- Статус алгоритма -->
+        <div style="margin-bottom: 20px;">
+            {% if algorithm.is_pending %}
+                <span style="display: inline-block; background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 20px; font-size: 14px; border: 1px solid #ffeaa7;">
+                    ⏳ На модерации
+                </span>
+                {% if user.is_authenticated and user.username == algorithm.author_name %}
+                    <p style="color: #666; margin-top: 10px; font-style: italic;">
+                        Ваш алгоритм находится на проверке у модераторов. После одобрения он станет виден всем пользователям.
+                    </p>
+                {% endif %}
+            {% elif algorithm.is_approved %}
+                <span style="display: inline-block; background: #d4edda; color: #155724; padding: 6px 12px; border-radius: 20px; font-size: 14px; border: 1px solid #c3e6cb;">
+                    ✅ Одобрен
+                </span>
+            {% elif algorithm.is_rejected %}
+                <span style="display: inline-block; background: #f8d7da; color: #721c24; padding: 6px 12px; border-radius: 20px; font-size: 14px; border: 1px solid #f5c6cb;">
+                    ❌ Отклонен
+                </span>
+                <!-- Причина отклонения (видна только автору) -->
+                {% if user.is_authenticated and user.username == algorithm.author_name %}
+                    <div style="margin-top: 10px; padding: 15px; background: #f8f9fa; border-radius: 4px; border-left: 4px solid #dc3545;">
+                        <strong>Причина отклонения:</strong> 
+                        <p style="margin: 5px 0 0 0; color: #721c24;">
+                            {{ algorithm.rejection_reason|default:"Причина не указана" }}
+                        </p>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+        
         <!-- Теги -->
         <div style="margin-bottom: 20px;">
             <strong style="color: #666; font-size: 16px;">Теги:</strong>
@@ -47,44 +78,63 @@
     
     <!-- Мета-информация -->
     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <div>
-            <strong style="color: #666;">Автор:</strong>
-            <div style="color: #333; margin-top: 5px;">
-                <a href="{% url 'user_profile' algorithm.author_name %}" style="color: #4CAF50; text-decoration: none;">
-                    {{ algorithm.author_name }}
-                </a>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <strong style="color: #666;">Автор:</strong>
+                <div style="color: #333; margin-top: 5px;">
+                    <a href="{% url 'user_profile' algorithm.author_name %}" style="color: #4CAF50; text-decoration: none;">
+                        {{ algorithm.author_name }}
+                    </a>
+                </div>
             </div>
-        </div>
-        <div>
-            <strong style="color: #666;">Дата создания:</strong>
-            <div style="color: #333; margin-top: 5px;">
-                {% timezone "Europe/Moscow" %}
-                    {{ algorithm.created_at|date:"d.m.Y H:i" }}
-                {% endtimezone %}
+            <div>
+                <strong style="color: #666;">Дата создания:</strong>
+                <div style="color: #333; margin-top: 5px;">
+                    {% timezone "Europe/Moscow" %}
+                        {{ algorithm.created_at|date:"d.m.Y H:i" }}
+                    {% endtimezone %}
+                </div>
             </div>
-        </div>
-        <div>
-            <strong style="color: #666;">Последнее обновление:</strong>
-            <div style="color: #333; margin-top: 5px;">
-                {% timezone "Europe/Moscow" %}
-                    {{ algorithm.updated_at|date:"d.m.Y H:i" }}
-                {% endtimezone %}
+            <div>
+                <strong style="color: #666;">Последнее обновление:</strong>
+                <div style="color: #333; margin-top: 5px;">
+                    {% timezone "Europe/Moscow" %}
+                        {{ algorithm.updated_at|date:"d.m.Y H:i" }}
+                    {% endtimezone %}
+                </div>
             </div>
+            {% if algorithm.is_approved and algorithm.moderated_by %}
+                <div>
+                    <strong style="color: #666;">Проверил:</strong>
+                    <div style="color: #333; margin-top: 5px;">
+                        {{ algorithm.moderated_by.username }}
+                        {% if algorithm.moderated_at %}
+                            ({% timezone "Europe/Moscow" %}{{ algorithm.moderated_at|date:"d.m.Y H:i" }}{% endtimezone %})
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
         </div>
-    </div>
     </div>
     
     <!-- Действия -->
     <div style="margin-top: 30px; text-align: center;">
-    <a href="{% url 'algorithm_list' %}" class="btn btn-secondary" style="margin-right: 10px;">
-        ← Назад к списку
-    </a>
-    {% if user.is_authenticated and user.username == algorithm.author_name %}
-        <a href="{% url 'edit_algorithm' algorithm.id %}" class="btn btn-primary">
-            Редактировать алгоритм
+        <a href="{% url 'algorithm_list' %}" class="btn btn-secondary" style="margin-right: 10px;">
+            ← Назад к списку
         </a>
-    {% endif %}
+        
+        <!-- Кнопка редактирования для автора -->
+        {% if user.is_authenticated and user.username == algorithm.author_name %}
+            <a href="{% url 'edit_algorithm' algorithm.id %}" class="btn btn-primary">
+                {% if algorithm.is_pending %}
+                    Редактировать алгоритм
+                {% elif algorithm.is_approved %}
+                    Редактировать и отправить на модерацию
+                {% elif algorithm.is_rejected %}
+                    Исправить и отправить снова
+                {% endif %}
+            </a>
+        {% endif %}
     </div>
 </div>
 
@@ -105,7 +155,7 @@
         color: white;
     }
     
-    .btn-primary:hover:not(:disabled) {
+    .btn-primary:hover {
         background: #45a049;
     }
     

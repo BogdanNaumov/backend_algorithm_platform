@@ -6,9 +6,41 @@
 <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
     <h1>Редактировать алгоритм</h1>
     
-    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #007bff;">
-        <strong>Вы редактируете:</strong> {{ algorithm.name }}<br>
-        <small>Создан: {{ algorithm.created_at|date:"d.m.Y H:i" }} | Последнее обновление: {{ algorithm.updated_at|date:"d.m.Y H:i" }}</small>
+    <!-- Информация о статусе -->
+    <div style="background: 
+        {% if algorithm.is_pending %}#e7f3ff{% endif %}
+        {% if algorithm.is_approved %}#d4edda{% endif %}
+        {% if algorithm.is_rejected %}#f8d7da{% endif %}
+        ; padding: 15px; border-radius: 8px; margin-bottom: 20px; 
+        border-left: 4px solid 
+        {% if algorithm.is_pending %}#007bff{% endif %}
+        {% if algorithm.is_approved %}#28a745{% endif %}
+        {% if algorithm.is_rejected %}#dc3545{% endif %}
+        ;">
+        <strong>
+            {% if algorithm.is_pending %}
+                ⏳ Алгоритм находится на модерации
+            {% elif algorithm.is_approved %}
+                ✅ Алгоритм одобрен
+            {% elif algorithm.is_rejected %}
+                ❌ Алгоритм был отклонен
+            {% endif %}
+        </strong>
+        
+        {% if algorithm.is_rejected and algorithm.rejection_reason %}
+            <div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 4px;">
+                <strong>Причина отклонения:</strong> 
+                <p style="margin: 5px 0 0 0;">{{ algorithm.rejection_reason }}</p>
+            </div>
+        {% endif %}
+        
+        {% if algorithm.is_approved or algorithm.is_rejected %}
+            <div style="margin-top: 10px;">
+                <small>
+                    После сохранения изменений алгоритм будет отправлен на повторную модерацию.
+                </small>
+            </div>
+        {% endif %}
     </div>
     
     <form method="post">
@@ -64,7 +96,13 @@
         </div>
         
         <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            <button type="submit" class="btn btn-primary">
+                {% if algorithm.is_approved or algorithm.is_rejected %}
+                    Сохранить и отправить на модерацию
+                {% else %}
+                    Сохранить изменения
+                {% endif %}
+            </button>
             <a href="{% url 'algorithm_detail' algorithm.id %}" class="btn btn-secondary">Отмена</a>
             <a href="{% url 'algorithm_list' %}" style="margin-left: auto; color: #6c757d; text-decoration: none;">← К списку алгоритмов</a>
         </div>

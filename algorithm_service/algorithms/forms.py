@@ -43,3 +43,21 @@ class AlgorithmForm(forms.ModelForm):
         if len(code.strip()) < 5:
             raise forms.ValidationError('Код должен содержать минимум 5 символов')
         return code
+
+class AlgorithmModerationForm(forms.ModelForm):
+    rejection_reason = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Укажите причину отклонения (если отклоняете)',
+            'rows': 3
+        }),
+        label='Причина отклонения'
+    )
+    
+    class Meta:
+        model = Algorithm
+        fields = ['status', 'rejection_reason']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-control'}),
+        }

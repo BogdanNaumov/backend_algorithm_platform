@@ -52,9 +52,17 @@ def user_profile(request, username):
         # Получаем все алгоритмы этого пользователя
         user_algorithms = Algorithm.objects.filter(author_name=username).order_by('-created_at')
         
+        # Статистика по статусам
+        approved_count = user_algorithms.filter(status=Algorithm.STATUS_APPROVED).count()
+        pending_count = user_algorithms.filter(status=Algorithm.STATUS_PENDING).count()
+        rejected_count = user_algorithms.filter(status=Algorithm.STATUS_REJECTED).count()
+        
         context = {
             'profile_user': user,
             'algorithms': user_algorithms,
+            'approved_count': approved_count,
+            'pending_count': pending_count,
+            'rejected_count': rejected_count,
         }
         
         return render(request, 'users/profile.html', context)
