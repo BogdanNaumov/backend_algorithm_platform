@@ -7,31 +7,37 @@ from .models import Algorithm
 from .serializers import AlgorithmSerializer
 
 class IsModerator(permissions.BasePermission):
+    """
+    Разрешение: только модераторы (staff или в группе 'Модераторы').
+    """
     def has_permission(self, request, view):
-        return request.user.is_authenticated and (request.user.is_staff or request.user.groups.filter(name='Модераторы').exists())
+        user = request.user
+        return bool(user and user.is_authenticated and (user.is_staff or user.groups.filter(name='Модераторы').exists()))
 
 class AlgorithmList(generics.ListCreateAPIView):
+    """
+    GET: список алгоритмов (фильтрация: q)
+    POST: создание алгоритма (автор берётся из request.user)
+    """
     serializer_class = AlgorithmSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         queryset = Algorithm.objects.all()
-        query = self.request.query_params.get('q', None)
+        query = self.request.query_params.get('q')
         user = self.request.user
 
-        # Если пользователь не аутентифицирован, показываем только одобренные
         if not user.is_authenticated:
             queryset = queryset.filter(status=Algorithm.STATUS_APPROVED)
         else:
-            # Если пользователь аутентифицирован, показываем одобренные и его собственные
-            if not user.is_staff and not user.groups.filter(name='Модераторы').exists():
+            if not (user.is_staff or user.groups.filter(name='Модераторы').exists()):
                 queryset = queryset.filter(
                     Q(status=Algorithm.STATUS_APPROVED) | Q(author_name=user.username)
                 )
 
         if query:
             queryset = queryset.filter(
-                Q(name__icontains=query) | 
+                Q(name__icontains=query) |
                 Q(tegs__icontains=query) |
                 Q(description__icontains=query) |
                 Q(author_name__icontains=query)
@@ -40,52 +46,45 @@ class AlgorithmList(generics.ListCreateAPIView):
         return queryset.order_by('-created_at')
 
     def perform_create(self, serializer):
-        # Автоматически устанавливаем статус "на модерации"
         serializer.save(status=Algorithm.STATUS_PENDING)
 
 class AlgorithmDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Просмотр / редактирование / удаление алгоритма.
+    Правило: только автор может редактировать/удалять; модераторы имеют отдельные endpoints для модерации.
+    """
     queryset = Algorithm.objects.all()
     serializer_class = AlgorithmSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        # Используем тот же фильтр, что и в AlgorithmList
         queryset = Algorithm.objects.all()
         user = self.request.user
 
         if not user.is_authenticated:
             queryset = queryset.filter(status=Algorithm.STATUS_APPROVED)
         else:
-            if not user.is_staff and not user.groups.filter(name='Модераторы').exists():
-                queryset = queryset.filter(
-                    Q(status=Algorithm.STATUS_APPROVED) | Q(author_name=user.username)
-                )
+            if not (user.is_staff or user.groups.filter(name='Модераторы').exists()):
+                queryset = queryset.filter(Q(status=Algorithm.STATUS_APPROVED) | Q(author_name=user.username))
         return queryset
 
     def update(self, request, *args, **kwargs):
-        # Проверяем, может ли пользователь редактировать этот алгоритм
         algorithm = self.get_object()
         if not algorithm.can_edit(request.user):
-            return Response(
-                {'detail': 'У вас нет прав для редактирования этого алгоритма.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({'detail': 'У вас нет прав для редактирования этого алгоритма.'}, status=status.HTTP_403_FORBIDDEN)
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         algorithm = self.get_object()
         if not algorithm.can_edit(request.user):
-            return Response(
-                {'detail': 'У вас нет прав для удаления этого алгоритма.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({'detail': 'У вас нет прав для удаления этого алгоритма.'}, status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
 
 @api_view(['GET'])
 @permission_classes([IsModerator])
 def moderation_list(request):
     """
-    Список алгоритмов на модерации (только для модераторов)
+    Список алгоритмов на модерации — доступен только модераторам.
     """
     pending_algorithms = Algorithm.objects.filter(status=Algorithm.STATUS_PENDING).order_by('created_at')
     serializer = AlgorithmSerializer(pending_algorithms, many=True, context={'request': request})
@@ -95,24 +94,18 @@ def moderation_list(request):
 @permission_classes([IsModerator])
 def moderate_algorithm(request, algorithm_id):
     """
-    Модерация алгоритма (одобрение/отклонение)
+    Endpoint для модерации: установить approved/rejected + указать причину.
     """
     try:
         algorithm = Algorithm.objects.get(id=algorithm_id, status=Algorithm.STATUS_PENDING)
     except Algorithm.DoesNotExist:
-        return Response(
-            {'detail': 'Алгоритм не найден или уже прошел модерацию.'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({'detail': 'Алгоритм не найден или уже прошел модерацию.'}, status=status.HTTP_404_NOT_FOUND)
 
     status_action = request.data.get('status')
     rejection_reason = request.data.get('rejection_reason', '')
 
     if status_action not in [Algorithm.STATUS_APPROVED, Algorithm.STATUS_REJECTED]:
-        return Response(
-            {'detail': 'Неверный статус. Допустимые значения: "approved", "rejected".'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response({'detail': 'Неверный статус. Допустимые значения: "approved", "rejected".'}, status=status.HTTP_400_BAD_REQUEST)
 
     algorithm.status = status_action
     algorithm.rejection_reason = rejection_reason if status_action == Algorithm.STATUS_REJECTED else ''

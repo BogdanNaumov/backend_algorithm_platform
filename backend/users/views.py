@@ -1,11 +1,12 @@
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from algorithms.models import Algorithm
 from algorithms.serializers import AlgorithmSerializer
 from .serializers import UserSerializer, RegisterSerializer
+
+User = get_user_model()
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
@@ -13,9 +14,9 @@ class UserList(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        queryset = User.objects.all()
-        username = self.request.query_params.get('username', None)
-        if username is not None:
+        queryset = super().get_queryset()
+        username = self.request.query_params.get('username')
+        if username:
             queryset = queryset.filter(username__icontains=username)
         return queryset
 
@@ -34,7 +35,7 @@ class RegisterView(generics.CreateAPIView):
 @permission_classes([permissions.IsAuthenticated])
 def current_user(request):
     """
-    Получить текущего пользователя
+    Возвращает данные текущего аутентифицированного пользователя.
     """
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
@@ -42,24 +43,20 @@ def current_user(request):
 @api_view(['GET'])
 def user_algorithms(request, username):
     """
-    Получить алгоритмы пользователя
+    Возвращает алгоритмы указанного пользователя.
+    Если запрашивает сам пользователь или staff — показываются все,
+    иначе — только одобренные.
     """
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        return Response(
-            {'detail': 'Пользователь не найден.'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({'detail': 'Пользователь не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
     algorithms = Algorithm.objects.filter(author_name=username).order_by('-created_at')
-    
-    # Проверяем, может ли текущий пользователь видеть все алгоритмы или только одобренные
+
     if request.user.is_authenticated and (request.user.username == username or request.user.is_staff):
-        # Показываем все алгоритмы
         pass
     else:
-        # Показываем только одобренные
         algorithms = algorithms.filter(status=Algorithm.STATUS_APPROVED)
 
     serializer = AlgorithmSerializer(algorithms, many=True, context={'request': request})

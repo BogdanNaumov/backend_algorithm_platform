@@ -6,55 +6,37 @@ class AlgorithmForm(forms.ModelForm):
         model = Algorithm
         fields = ['name', 'tegs', 'description', 'code']
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Название алгоритма'
-            }),
-            'tegs': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Теги через запятую'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Описание алгоритма',
-                'rows': 4
-            }),
-            'code': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Код алгоритма',
-                'rows': 8
-            }),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название алгоритма'}),
+            'tegs': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Теги через запятую'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание алгоритма', 'rows': 4}),
+            'code': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Код алгоритма', 'rows': 8}),
         }
-    
+
     def clean_name(self):
-        name = self.cleaned_data['name']
-        if len(name.strip()) < 3:
+        name = self.cleaned_data.get('name', '').strip()
+        if len(name) < 3:
             raise forms.ValidationError('Название должно содержать минимум 3 символа')
         return name
-    
+
     def clean_description(self):
-        description = self.cleaned_data['description']
-        if len(description.strip()) < 10:
+        description = self.cleaned_data.get('description', '').strip()
+        if len(description) < 10:
             raise forms.ValidationError('Описание должно содержать минимум 10 символов')
         return description
-    
+
     def clean_code(self):
-        code = self.cleaned_data['code']
-        if len(code.strip()) < 5:
+        code = self.cleaned_data.get('code', '').strip()
+        if len(code) < 5:
             raise forms.ValidationError('Код должен содержать минимум 5 символов')
         return code
 
 class AlgorithmModerationForm(forms.ModelForm):
     rejection_reason = forms.CharField(
         required=False,
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'placeholder': 'Укажите причину отклонения (если отклоняете)',
-            'rows': 3
-        }),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Причина отклонения', 'rows': 3}),
         label='Причина отклонения'
     )
-    
+
     class Meta:
         model = Algorithm
         fields = ['status', 'rejection_reason']
