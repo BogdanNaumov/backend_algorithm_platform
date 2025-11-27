@@ -3,9 +3,6 @@ name: Users Comprehensive Tests
 on:
   push:
     branches: [ main, develop ]
-    paths:
-      - 'users/**'
-      - 'algorithms/**'  # Нужно для тестов, которые используют алгоритмы
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
