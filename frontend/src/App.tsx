@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { AuthProvider, useAuth } from './stores/AuthContext';
 import Home from './pages/Home';
 import AddAlgorithm from './pages/AddAlgorithm';
 import Profile from './pages/Profile';
@@ -9,7 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AlgorithmDetails from './pages/AlgorithmDetails';
 import Moderation from './pages/Moderation';
-import ToastHost from './components/ToastHost';
+import ToastHost from './components/common/ToastHost';
 import { hasModerationAccess } from './utils/authUtils';
 
 // Компонент для защищенных маршрутов
@@ -27,7 +27,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 function AppContent() {
   const [activeTab, setActiveTab] = useState('/');
   const location = useLocation();
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     setActiveTab(location.pathname);
@@ -46,7 +46,7 @@ function AppContent() {
     }
   };
 
-  const underlineVariants = {
+  const underlineVariants: Variants = {
     active: {
       width: "100%",
       opacity: 1,
@@ -59,20 +59,20 @@ function AppContent() {
     }
   };
 
-  const pageVariants = {
-    initial: { 
+  const pageVariants: Variants = {
+    initial: {
       opacity: 0,
       y: 20
     },
-    in: { 
+    in: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3, ease: "easeOut" }
+      transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
     },
-    out: { 
+    out: {
       opacity: 0,
       y: -20,
-      transition: { duration: 0.2, ease: "easeIn" }
+      transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] }
     }
   };
 

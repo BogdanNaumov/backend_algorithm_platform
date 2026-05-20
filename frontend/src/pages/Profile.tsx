@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiService } from '../service/api';
+import { useAuth } from '../stores/AuthContext';
+import { apiService } from '../services/api';
 import { ModeratedAlgorithm, AlgorithmPurchaseItem } from '../types';
 import { Link, useLocation } from 'react-router-dom';
-import './Home.css';
-import './Profile.css';
+import '../styles/pages/Home.css';
+import '../styles/pages/Profile.css';
 
 function isRealisticEmail(email: string): boolean {
   const v = email.trim();

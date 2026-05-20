@@ -1,7 +1,7 @@
 import React, { useEffect, useId, useMemo, useState } from 'react';
-import { apiService } from '../service/api';
-import type { PriceHistoryPoint } from '../types';
-import './PriceMonitorPanel.css';
+import { apiService } from '../../services/api';
+import type { PriceHistoryPoint } from '../../types';
+import '../../styles/components/PriceMonitorPanel.css';
 
 const W = 640;
 const H = 220;

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { apiService } from "../service/api";
+import { apiService } from "../services/api";
 import { ModeratedAlgorithm } from "../types";
-import './Home.css';
-import SiteFooter from '../components/SiteFooter';
+import '../styles/pages/Home.css';
+import SiteFooter from '../components/common/SiteFooter';
 
 const Home: React.FC = () => {
   const [algorithms, setAlgorithms] = useState<ModeratedAlgorithm[]>([]);

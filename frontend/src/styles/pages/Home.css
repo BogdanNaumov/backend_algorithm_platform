@@ -486,6 +486,8 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  border: none;
+  cursor: pointer;
 }
 
 .details-btn::before {
@@ -605,9 +607,8 @@
 }
 
 .loading-text {
-  color: #6b7280;
+  color: #64748b;
   font-size: 1.1rem;
-  font-weight: 500;
 }
 
 @keyframes spin {
@@ -615,113 +616,23 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .algorithms-grid {
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  }
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-  .hero-section {
-    padding: 3rem 1rem;
-  }
-  
   .hero-title {
     font-size: 2.25rem;
   }
-  
-  .main-content {
-    padding: 0 1rem 3rem;
+
+  .algorithms-grid {
+    grid-template-columns: 1fr;
   }
-  
+
   .filters-container {
     flex-direction: column;
     align-items: stretch;
-    gap: 1.5rem;
-    margin: 0 1rem;
   }
-  
+
   .filter-group {
-    min-width: auto;
-  }
-  
-  .results-info {
-    text-align: left;
-    padding: 0;
-  }
-  
-  .algorithms-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .search-input-wrapper {
-    flex-direction: column;
-    margin: 0 1rem;
-  }
-  
-  .search-btn {
-    padding: 1rem;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-title {
-    font-size: 2rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
-  
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .card-badges {
-    flex-direction: row;
     width: 100%;
-    justify-content: flex-start;
+    min-width: unset;
   }
-  
-  .filters-container {
-    padding: 1.25rem;
-    margin: 0 0.5rem;
-  }
-  
-  .algorithms-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Улучшения для стеклянного эффекта */
-@media (prefers-reduced-motion: reduce) {
-  .algorithm-card,
-  .details-btn,
-  .search-btn,
-  .primary-btn,
-  .retry-btn,
-  .reset-filters-btn {
-    transition: none;
-  }
-  
-  .details-btn:hover .btn-arrow,
-  .search-btn::before,
-  .details-btn::before,
-  .primary-btn::before {
-    transition: none;
-    transform: none;
-  }
-}
-
-/* Контейнер на всю доступную ширину */
-.content-container {
-  width: 100%;
-  max-width: none;
-  margin-left: 0;
-  margin-right: 0;
-  box-sizing: border-box;
 }

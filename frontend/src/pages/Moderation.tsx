@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { apiService } from '../service/api';
+import { useAuth } from '../stores/AuthContext';
+import { apiService } from '../services/api';
 import { ModeratedAlgorithm } from '../types';
 import { ALGORITHM_STATUS_DISPLAY, ALGORITHM_STATUS_COLORS } from '../utils/constants';
 import { hasModerationAccess, getUserRoleDisplay } from '../utils/authUtils';
-import './Moderation.css';
+import '../styles/pages/Moderation.css';
 
 const Moderation: React.FC = () => {
   const [algorithms, setAlgorithms] = useState<ModeratedAlgorithm[]>([]);

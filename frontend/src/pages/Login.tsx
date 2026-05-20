@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../stores/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { apiService } from '../service/api';
-import SiteFooter from '../components/SiteFooter';
-import './Auth.css';
+import { apiService } from '../services/api';
+import SiteFooter from '../components/common/SiteFooter';
+import '../styles/pages/Auth.css';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
