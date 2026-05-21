@@ -3,9 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import CodeMirror from '@uiw/react-codemirror';
 import { cpp } from '@codemirror/lang-cpp';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { apiService } from '../service/api';
+import { apiService } from '../services/api';
 import { Algorithm } from '../types';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../stores/AuthContext';
 import {
   DEFAULT_LANGUAGE,
   getDefaultFormCode,

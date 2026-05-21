@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './SiteFooter.css';
+import '../../styles/components/SiteFooter.css';
 
 const SiteFooter: React.FC = () => {
   return (
@@ -49,7 +49,9 @@ const SiteFooter: React.FC = () => {
           <span className="site-footer__bar-sep" aria-hidden>
             ·
           </span>
-          <span>Платформа алгоритмов</span>
+          <a href="/" className="site-footer__link">
+            Вернуться на главную
+          </a>
         </div>
       </div>
     </footer>

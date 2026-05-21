@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../stores/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import SiteFooter from '../components/SiteFooter';
-import './Auth.css';
+import SiteFooter from '../components/common/SiteFooter';
+import '../styles/pages/Auth.css';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({

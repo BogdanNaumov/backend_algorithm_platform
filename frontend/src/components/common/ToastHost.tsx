@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './ToastHost.css';
+import '../../styles/components/ToastHost.css';
 
 export interface ToastPayload {
   title?: string;

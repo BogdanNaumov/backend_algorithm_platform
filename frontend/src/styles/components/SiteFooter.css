@@ -101,6 +101,16 @@
   user-select: none;
 }
 
+.site-footer__link {
+  color: rgba(148, 163, 184, 0.95);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.site-footer__link:hover {
+  color: #fff;
+}
+
 @media (max-width: 900px) {
   .site-footer__cols {
     grid-template-columns: 1fr 1fr;

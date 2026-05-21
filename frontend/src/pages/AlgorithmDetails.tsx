@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { apiService } from '../service/api';
+import { apiService } from '../services/api';
 import { ModeratedAlgorithm } from '../types';
-import { useAuth } from '../contexts/AuthContext';
-import PriceMonitorPanel from '../components/PriceMonitorPanel';
-import './AlgorithmDetails.css';
+import { useAuth } from '../stores/AuthContext';
+import PriceMonitorPanel from '../components/algorithm/PriceMonitorPanel';
+import '../styles/pages/AlgorithmDetails.css';
 
 const AlgorithmDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
