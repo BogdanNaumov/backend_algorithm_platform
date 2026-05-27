@@ -59,8 +59,6 @@ export const LANGUAGE_CONFIGS: LanguageConfig[] = [
     compilers: [
       { value: 'g++', label: 'g++ (GCC)' },
       { value: 'gcc', label: 'gcc (GCC)' },
-      { value: 'clang++', label: 'clang++ (LLVM)' },
-      { value: 'clang', label: 'clang (LLVM)' },
     ],
     template: CPP_TEMPLATE,
   },

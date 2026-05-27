@@ -283,8 +283,17 @@ const AlgorithmDetails: React.FC = () => {
                   >
                     <div style={{ marginBottom: 8 }}>
                       <strong>Результат:</strong>{' '}
-                      <span style={{ color: runResult.compiled ? '#27ae60' : '#c0392b' }}>
-                        {runResult.compiled ? 'Выполнено' : 'Ошибка'}
+                      <span
+                        style={{
+                          color:
+                            runResult.compiled && runResult.ran ? '#27ae60' : '#c0392b',
+                        }}
+                      >
+                        {!runResult.compiled
+                          ? 'Ошибка компиляции'
+                          : runResult.ran
+                            ? 'Выполнено'
+                            : 'Ошибка выполнения'}
                       </span>
                     </div>
 

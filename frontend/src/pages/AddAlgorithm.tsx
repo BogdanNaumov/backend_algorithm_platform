@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import CodeMirror from '@uiw/react-codemirror';
 import { cpp } from '@codemirror/lang-cpp';
+import { java } from '@codemirror/lang-java';
+import { python } from '@codemirror/lang-python';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { apiService } from '../services/api';
 import { Algorithm } from '../types';
@@ -167,6 +169,12 @@ const AddAlgorithm: React.FC = () => {
   const codeEditorExtensions = useMemo(() => {
     if (formData.language === 'C++') {
       return [cpp()];
+    }
+    if (formData.language === 'Java') {
+      return [java()];
+    }
+    if (formData.language === 'Python') {
+      return [python()];
     }
     return [];
   }, [formData.language]);
@@ -429,8 +437,17 @@ const AddAlgorithm: React.FC = () => {
               >
                 <div style={{ marginBottom: 8 }}>
                   <strong>Результат:</strong>{' '}
-                  <span style={{ color: runResult.compiled ? '#27ae60' : '#c0392b' }}>
-                    {runResult.compiled ? 'Выполнено' : 'Ошибка'}
+                  <span
+                    style={{
+                      color:
+                        runResult.compiled && runResult.ran ? '#27ae60' : '#c0392b',
+                    }}
+                  >
+                    {!runResult.compiled
+                      ? 'Ошибка компиляции'
+                      : runResult.ran
+                        ? 'Выполнено'
+                        : 'Ошибка выполнения'}
                   </span>
                 </div>
 

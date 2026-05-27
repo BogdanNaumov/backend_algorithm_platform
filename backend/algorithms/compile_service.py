@@ -120,6 +120,20 @@ def _limit_resources_unix(memory_mb: int, cpu_s: int):
     return _preexec
 
 
+def _limit_cpu_unix(cpu_s: int):
+    """Лимит CPU без RLIMIT_AS — JVM (особенно JDK 21) не стартует при жёстком AS."""
+    try:
+        import resource  # type: ignore
+    except Exception:
+        return None
+
+    def _preexec():
+        resource.setrlimit(resource.RLIMIT_CPU, (cpu_s, cpu_s))
+        resource.setrlimit(resource.RLIMIT_FSIZE, (10 * 1024 * 1024, 10 * 1024 * 1024))
+
+    return _preexec
+
+
 def compile_cpp(
     code: str,
     compiler: str = "g++",
@@ -367,6 +381,35 @@ def _which_or_err(bin_name: str, err_label: str) -> tuple[str | None, str | None
     return p, None
 
 
+def _java_runtime_opts(memory_mb: int) -> list[str]:
+    # Память ограничиваем флагами JVM (RLIMIT_AS для Java не используем — см. run_java).
+    heap_mb = max(32, min(128, int(memory_mb or 256) // 2))
+    return [
+        "-Xms8m",
+        f"-Xmx{heap_mb}m",
+        "-XX:ReservedCodeCacheSize=16m",
+        "-XX:InitialCodeCacheSize=16m",
+        "-XX:MaxMetaspaceSize=32m",
+        "-XX:+UseSerialGC",
+        "-Xss256k",
+    ]
+
+
+def _normalize_java_run_output(stdout: str, stderr: str, exit_code: int | None) -> tuple[str, str, bool]:
+    out = stdout or ""
+    err = stderr or ""
+    failed = exit_code not in (0, None)
+    jvm_init_err = "Error occurred during initialization of VM"
+    if jvm_init_err in out or jvm_init_err in err:
+        failed = True
+        if jvm_init_err in out:
+            err = f"{err}\n{out}".strip() if err else out
+            out = ""
+    elif failed and out.strip() and not err.strip():
+        err, out = out, ""
+    return out, err, not failed
+
+
 def compile_python(code: str, timeout_s: int = 5) -> CompileResult:
     with tempfile.TemporaryDirectory(prefix="algo_py_compile_") as tmp:
         src = os.path.join(tmp, "main.py")
@@ -533,8 +576,8 @@ def run_java(code: str, stdin: str = "", compile_timeout_s: int = 10, run_timeou
         if err2:
             return cr, RunResult(False, "", err2, None, ["java"])
 
-        preexec = _limit_resources_unix(memory_mb=memory_mb, cpu_s=run_timeout_s) if os.name != "nt" else None
-        run_cmd = [java, "-cp", tmp, "Main"]
+        preexec = _limit_cpu_unix(cpu_s=run_timeout_s) if os.name != "nt" else None
+        run_cmd = [java, *_java_runtime_opts(memory_mb), "-cp", tmp, "Main"]
         try:
             run_proc = subprocess.run(
                 run_cmd,
@@ -551,7 +594,18 @@ def run_java(code: str, stdin: str = "", compile_timeout_s: int = 10, run_timeou
         except OSError as e:
             return cr, RunResult(False, "", f"Не удалось запустить java: {e}", None, run_cmd)
 
-        return cr, RunResult(True, _truncate(run_proc.stdout or "", MAX_OUTPUT_CHARS), _truncate(run_proc.stderr or "", MAX_OUTPUT_CHARS), run_proc.returncode, run_cmd)
+        stdout, stderr, ran_ok = _normalize_java_run_output(
+            run_proc.stdout or "",
+            run_proc.stderr or "",
+            run_proc.returncode,
+        )
+        return cr, RunResult(
+            ran=ran_ok,
+            stdout=_truncate(stdout, MAX_OUTPUT_CHARS),
+            stderr=_truncate(stderr, MAX_OUTPUT_CHARS),
+            exit_code=run_proc.returncode,
+            command=run_cmd,
+        )
 
 
 def compile_code(language: str, code: str, compiler: str | None = None) -> CompileResult:
