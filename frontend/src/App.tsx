@@ -141,7 +141,7 @@ function AppContent() {
                   variants={tabVariants}
                   animate={activeTab === '/moderation' ? 'active' : 'inactive'}
                 >
-                  ⚡ Модерация
+                   Модерация
                 </motion.span>
                 <motion.div 
                   className="nav-underline"
@@ -164,7 +164,7 @@ function AppContent() {
                   variants={tabVariants}
                   animate={activeTab === '/profile' ? 'active' : 'inactive'}
                 >
-                  👤 {user.username}
+                   {user.username}
                 </motion.span>
                 <motion.div 
                   className="nav-underline"
