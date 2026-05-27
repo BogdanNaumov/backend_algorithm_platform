@@ -292,7 +292,7 @@ const Moderation: React.FC = () => {
                 disabled={actionLoading || (actionType === 'reject' && !rejectionReason.trim())}
               >
                 <span className="btn-icon">
-                  {actionType === 'approve' ? '✓' : '✕'}
+                  {actionType === 'approve' ? 'Одобрить' : 'Отклонить'}
                 </span>
                 {actionType === 'approve' ? 'Да, одобрить' : 'Отклонить'}
               </button>
@@ -343,15 +343,15 @@ const AlgorithmCard: React.FC<{
       
       <div className="card-details">
         <div className="detail-item">
-          <span className="detail-label">👤 Автор</span>
+          <span className="detail-label">Автор</span>
           <span className="detail-value">{algorithm.author_name}</span>
         </div>
         <div className="detail-item">
-          <span className="detail-label">⚙️ Компилятор</span>
+          <span className="detail-label">Компилятор</span>
           <span className="detail-value">{algorithm.compiler}</span>
         </div>
         <div className="detail-item">
-          <span className="detail-label">📏 Код</span>
+          <span className="detail-label">Код</span>
           <span className="detail-value">{algorithm.code?.length || 0} символов</span>
         </div>
       </div>
@@ -388,14 +388,14 @@ const AlgorithmCard: React.FC<{
             className="action-btn approve-btn"
             onClick={() => onApprove(algorithm)}
           >
-            <span className="btn-icon">✓</span>
+            <span className="btn-icon"></span>
             Одобрить
           </button>
           <button
             className="action-btn reject-btn"
             onClick={() => onReject(algorithm)}
           >
-            <span className="btn-icon">✕</span>
+            <span className="btn-icon"></span>
             Отклонить
           </button>
           <Link
@@ -403,7 +403,7 @@ const AlgorithmCard: React.FC<{
             className="action-btn details-btn"
             target="_blank"
           >
-            <span className="btn-icon">👁️</span>
+            <span className="btn-icon"></span>
             Подробнее
           </Link>
         </div>

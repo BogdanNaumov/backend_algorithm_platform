@@ -99,7 +99,7 @@ const Home: React.FC = () => {
                 className="search-input"
               />
               <button type="submit" className="search-btn">
-                <span className="search-icon">🔍</span>
+                <span className="search-icon"></span>
                 Найти
               </button>
             </div>
@@ -111,7 +111,7 @@ const Home: React.FC = () => {
         {error && (
           <div className="error-banner">
             <div className="error-content">
-              <span className="error-icon">⚠️</span>
+              <span className="error-icon"></span>
               <div className="error-text">
                 <strong>Ошибка:</strong> {error}
               </div>
@@ -167,7 +167,7 @@ const Home: React.FC = () => {
         <section className="algorithms-section">
           {filteredAlgorithms.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🔍</div>
+              <div className="empty-icon"></div>
               <h3 className="empty-title">Ничего не найдено</h3>
               <p className="empty-description">
                 {algorithms.length === 0 
@@ -203,7 +203,7 @@ const AlgorithmCard: React.FC<{ algorithm: ModeratedAlgorithm }> = ({ algorithm 
             <span className="card-date">
               {new Date(algorithm.createdAt).toLocaleDateString('ru-RU')}
             </span>
-            <span className="status-badge approved">✓ Одобрено</span>
+            <span className="status-badge approved">Одобрено</span>
           </div>
         </div>
         <div className="card-badges">
@@ -218,11 +218,11 @@ const AlgorithmCard: React.FC<{ algorithm: ModeratedAlgorithm }> = ({ algorithm 
       
       <div className="card-details">
         <div className="detail-item">
-          <span className="detail-label">👤 Автор</span>
+          <span className="detail-label">Автор</span>
           <span className="detail-value">{algorithm.author_name}</span>
         </div>
         <div className="detail-item">
-          <span className="detail-label">⚙️ Компилятор</span>
+          <span className="detail-label">Компилятор</span>
           <span className="detail-value">{algorithm.compiler}</span>
         </div>
       </div>

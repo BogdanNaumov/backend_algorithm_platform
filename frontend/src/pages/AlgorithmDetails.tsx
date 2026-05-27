@@ -112,7 +112,7 @@ const AlgorithmDetails: React.FC = () => {
     return (
       <div className="algorithm-details">
         <div className="error-container">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon"></div>
           <div className="error-text">{error || 'Алгоритм не найден'}</div>
           <button onClick={() => navigate('/')} className="back-btn error-btn">
             Вернуться на главную
@@ -141,7 +141,7 @@ const AlgorithmDetails: React.FC = () => {
         <div className="algorithm-meta">
           <div className="meta-badges">
             <div className="meta-badge">
-              <span className="badge-icon">👤</span>
+              <span className="badge-icon"></span>
               <div className="badge-content">
                 <span className="badge-label">Автор</span>
                 <span className="badge-value">{algorithm.author}</span>
@@ -226,12 +226,12 @@ const AlgorithmDetails: React.FC = () => {
                 >
                   {isCopied ? (
                     <>
-                      <span className="copy-icon">✓</span>
+                      <span className="copy-icon"></span>
                       Скопировано!
                     </>
                   ) : (
                     <>
-                      <span className="copy-icon">📋</span>
+                      <span className="copy-icon"></span>
                       Копировать
                     </>
                   )}
