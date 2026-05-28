@@ -203,7 +203,7 @@ const AlgorithmDetails: React.FC = () => {
           <section className="card paywall-card">
             <h2 className="card-title">Исходный код</h2>
             <p className="paywall-note">
-              Этот код доступен после покупки. Оплата сейчас имитируется: при нажатии «Купить» доступ открывается сразу.
+              Этот код доступен после покупки.
             </p>
             {purchaseError && (
               <div className="error-inline" role="alert">

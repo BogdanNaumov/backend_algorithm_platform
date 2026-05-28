@@ -17,6 +17,8 @@ const Moderation: React.FC = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
+  const [detailsViewOpen, setDetailsViewOpen] = useState(false);
+  const [selectedAlgorithmForDetails, setSelectedAlgorithmForDetails] = useState<ModeratedAlgorithm | null>(null);
   
   const { user } = useAuth();
 
@@ -75,6 +77,16 @@ const Moderation: React.FC = () => {
     setSelectedAlgorithm(null);
     setRejectionReason('');
     setActionType(null);
+  };
+
+  const handleOpenDetails = (algorithm: ModeratedAlgorithm) => {
+    setSelectedAlgorithmForDetails(algorithm);
+    setDetailsViewOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setDetailsViewOpen(false);
+    setSelectedAlgorithmForDetails(null);
   };
 
   const moderateAlgorithm = async () => {
@@ -223,6 +235,7 @@ const Moderation: React.FC = () => {
               algorithm={algorithm} 
               onApprove={handleOpenApproveDialog}
               onReject={handleOpenRejectDialog}
+              onViewDetails={handleOpenDetails}
             />
           ))}
         </div>
@@ -300,6 +313,14 @@ const Moderation: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Модальное окно для просмотра деталей */}
+      {detailsViewOpen && selectedAlgorithmForDetails && (
+        <AlgorithmDetailsModal 
+          algorithm={selectedAlgorithmForDetails}
+          onClose={handleCloseDetails}
+        />
+      )}
     </div>
   );
 };
@@ -309,7 +330,8 @@ const AlgorithmCard: React.FC<{
   algorithm: ModeratedAlgorithm;
   onApprove: (algorithm: ModeratedAlgorithm) => void;
   onReject: (algorithm: ModeratedAlgorithm) => void;
-}> = ({ algorithm, onApprove, onReject }) => {
+  onViewDetails: (algorithm: ModeratedAlgorithm) => void;
+}> = ({ algorithm, onApprove, onReject, onViewDetails }) => {
   return (
     <div className={`algorithm-card ${algorithm.isPaid ? 'paid' : 'free'} moderation-view`}>
       <div className="card-header">
@@ -383,7 +405,7 @@ const AlgorithmCard: React.FC<{
       )}
 
       {algorithm.status === 'pending' && (
-        <div className="card-actions moderation-actions">
+             <div className="card-actions moderation-actions">
           <button
             className="action-btn approve-btn"
             onClick={() => onApprove(algorithm)}
@@ -398,16 +420,182 @@ const AlgorithmCard: React.FC<{
             <span className="btn-icon"></span>
             Отклонить
           </button>
-          <Link
-            to={`/algorithm/${algorithm.id}`}
+          <button
             className="action-btn details-btn"
-            target="_blank"
+            onClick={() => onViewDetails(algorithm)}
           >
             <span className="btn-icon"></span>
             Подробнее
-          </Link>
+          </button>
         </div>
       )}
+    </div>
+  );
+};
+
+const AlgorithmDetailsModal: React.FC<{
+  algorithm: ModeratedAlgorithm;
+  onClose: () => void;
+}> = ({ algorithm, onClose }) => {
+  const [stdinValue, setStdinValue] = useState('');
+  const [runLoading, setRunLoading] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [runResult, setRunResult] = useState<{
+    compiled: boolean;
+    ran: boolean;
+    stdout: string;
+    stderr: string;
+  } | null>(null);
+
+  const handleRun = async () => {
+    setRunLoading(true);
+    setRunError(null);
+    setRunResult(null);
+
+    try {
+      const res = await apiService.runAlgorithm(algorithm.id, {
+        language: algorithm.language,
+        compiler: algorithm.compiler,
+        stdin: stdinValue,
+      });
+
+      setRunResult({
+        compiled: Boolean(res.compiled),
+        ran: Boolean(res.ran),
+        stdout: res.stdout ?? '',
+        stderr: res.stderr ?? '',
+      });
+    } catch (error) {
+      setRunError(error instanceof Error ? error.message : 'Не удалось запустить алгоритм');
+    } finally {
+      setRunLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="algorithm-details-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">{algorithm.title}</h2>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="modal-content">
+          <div className="details-section">
+            <h3 className="details-heading">Основная информация</h3>
+            <div className="details-grid">
+              <div className="detail-row">
+                <span className="detail-label">Автор:</span>
+                <span className="detail-value">{algorithm.author_name}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Язык:</span>
+                <span className="detail-value">{algorithm.language}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Компилятор:</span>
+                <span className="detail-value">{algorithm.compiler}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Тип:</span>
+                <span className="detail-value">{algorithm.isPaid ? 'Платный' : 'Бесплатный'}</span>
+              </div>
+              {algorithm.isPaid && algorithm.price && (
+                <div className="detail-row">
+                  <span className="detail-label">Цена:</span>
+                  <span className="detail-value">{algorithm.price} руб.</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="details-section">
+            <h3 className="details-heading">Описание</h3>
+            <p className="algorithm-description-full">{algorithm.description}</p>
+          </div>
+
+          {algorithm.tags.length > 0 && (
+            <div className="details-section">
+              <h3 className="details-heading">Теги</h3>
+              <div className="tags-list">
+                {algorithm.tags.map(tag => (
+                  <span key={tag} className="tag-item">{tag}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="details-section">
+            <h3 className="details-heading">Код</h3>
+            <pre className="code-preview">
+              <code>{algorithm.code}</code>
+            </pre>
+          </div>
+
+          <div className="run-section">
+            <h3 className="run-title">Запуск алгоритма</h3>
+            <label htmlFor="moderation-stdin" className="stdin-label">
+              Стандартный ввод (stdin)
+            </label>
+            <textarea
+              id="moderation-stdin"
+              className="stdin-textarea"
+              value={stdinValue}
+              onChange={(e) => setStdinValue(e.target.value)}
+              rows={5}
+              placeholder="Введите данные, которые будут переданы программе"
+            />
+
+            <div className="run-controls">
+              <button
+                type="button"
+                className="run-btn"
+                onClick={handleRun}
+                disabled={runLoading}
+              >
+                {runLoading ? 'Выполняется…' : 'Запустить код'}
+              </button>
+              {runError && <div className="run-error">{runError}</div>}
+            </div>
+
+            {runResult && (
+              <div className="run-result">
+                <div
+                  className={`run-result-status ${
+                    runResult.compiled && runResult.ran ? 'success' : 'error'
+                  }`}
+                >
+                  {!runResult.compiled
+                    ? 'Ошибка компиляции'
+                    : runResult.ran
+                    ? 'Выполнено'
+                    : 'Ошибка выполнения'}
+                </div>
+
+                {runResult.stderr?.trim() && (
+                  <div className="run-output-block">
+                    <div className="run-output-label">stderr</div>
+                    <pre className="run-output-text">{runResult.stderr}</pre>
+                  </div>
+                )}
+
+                {runResult.stdout?.trim() && (
+                  <div className="run-output-block">
+                    <div className="run-output-label">stdout</div>
+                    <pre className="run-output-text">{runResult.stdout}</pre>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="modal-footer">
+          <button className="btn-back" onClick={onClose}>
+            ← Назад
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
