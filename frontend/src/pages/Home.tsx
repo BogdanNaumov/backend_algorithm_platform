@@ -4,6 +4,7 @@ import { apiService } from "../services/api";
 import { ModeratedAlgorithm } from "../types";
 import '../styles/pages/Home.css';
 import SiteFooter from '../components/common/SiteFooter';
+import CustomSelect from '../components/common/CustomSelect';
 
 const Home: React.FC = () => {
   const [algorithms, setAlgorithms] = useState<ModeratedAlgorithm[]>([]);
@@ -125,32 +126,30 @@ const Home: React.FC = () => {
         <section className="filters-section">
           <div className="filters-container">
             <div className="filter-group">
-              <label htmlFor="language-filter" className="filter-label">Язык программирования</label>
-              <select 
-                id="language-filter"
-                value={languageFilter} 
-                onChange={(e) => setLanguageFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">Все языки</option>
-                <option value="C++">C/C++</option>
-                <option value="Python">Python</option>
-                <option value="Java">Java</option>
-              </select>
+              <label className="filter-label">Язык программирования</label>
+              <CustomSelect
+                value={languageFilter}
+                onChange={setLanguageFilter}
+                options={[
+                  { value: 'all', label: 'Все языки' },
+                  { value: 'C++', label: 'C/C++' },
+                  { value: 'Python', label: 'Python' },
+                  { value: 'Java', label: 'Java' },
+                ]}
+              />
             </div>
             
             <div className="filter-group">
-              <label htmlFor="type-filter" className="filter-label">Тип алгоритма</label>
-              <select 
-                id="type-filter"
-                value={typeFilter} 
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">Все типы</option>
-                <option value="free">Бесплатные</option>
-                <option value="paid">Платные</option>
-              </select>
+              <label className="filter-label">Тип алгоритма</label>
+              <CustomSelect
+                value={typeFilter}
+                onChange={setTypeFilter}
+                options={[
+                  { value: 'all', label: 'Все типы' },
+                  { value: 'free', label: 'Бесплатные' },
+                  { value: 'paid', label: 'Платные' },
+                ]}
+              />
             </div>
             
             <div className="results-info">
