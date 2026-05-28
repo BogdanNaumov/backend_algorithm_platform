@@ -28,9 +28,9 @@ const AlgorithmDetails: React.FC = () => {
   } | null>(null);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     const fetchAlgorithm = async () => {
       if (!id) return;
-      
       try {
         setLoading(true);
         const data = await apiService.getAlgorithmById(id);
@@ -42,7 +42,6 @@ const AlgorithmDetails: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchAlgorithm();
   }, [id, user?.username]);
 
@@ -63,7 +62,6 @@ const AlgorithmDetails: React.FC = () => {
 
   const handleCopyCode = async () => {
     if (!algorithm?.code) return;
-    
     try {
       await navigator.clipboard.writeText(algorithm.code);
       setIsCopied(true);
@@ -102,7 +100,7 @@ const AlgorithmDetails: React.FC = () => {
       <div className="algorithm-details">
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <div className="loading-text">Загрузка алгоритма...</div>
+          <p className="loading-text">Загрузка алгоритма...</p>
         </div>
       </div>
     );
@@ -112,8 +110,8 @@ const AlgorithmDetails: React.FC = () => {
     return (
       <div className="algorithm-details">
         <div className="error-container">
-          <div className="error-icon"></div>
-          <div className="error-text">{error || 'Алгоритм не найден'}</div>
+          <div className="error-icon" aria-hidden="true">⚠️</div>
+          <p className="error-text">{error || 'Алгоритм не найден'}</p>
           <button onClick={() => navigate('/')} className="back-btn error-btn">
             Вернуться на главную
           </button>
@@ -128,235 +126,193 @@ const AlgorithmDetails: React.FC = () => {
 
   return (
     <div className="algorithm-details">
-      <div className="details-header">
+      <header className="top-bar">
         <button
           type="button"
           className="back-link"
           onClick={() => navigate(-1)}
+          aria-label="Вернуться назад"
         >
-          <span className="back-arrow">←</span>
+          <span className="back-arrow" aria-hidden="true">←</span>
           Назад
         </button>
         <h1 className="algorithm-title">{algorithm.title}</h1>
-        <div className="algorithm-meta">
-          <div className="meta-badges">
-            <div className="meta-badge">
-              <span className="badge-icon"></span>
-              <div className="badge-content">
-                <span className="badge-label">Автор</span>
-                <span className="badge-value">{algorithm.author}</span>
-              </div>
-            </div>
-            <div className="meta-badge">
-              <span className="badge-icon">📅</span>
-              <div className="badge-content">
-                <span className="badge-label">Добавлен</span>
-                <span className="badge-value">
-                  {new Date(algorithm.createdAt).toLocaleDateString('ru-RU')}
-                </span>
-              </div>
-            </div>
+
+        <div className="meta-panel">
+          <div className="meta-info">
+            <span className="meta-item">
+              <span className="meta-icon" aria-hidden="true">👤</span>
+              {algorithm.author}
+            </span>
+            <span className="meta-separator" aria-hidden="true">·</span>
+            <span className="meta-item">
+              <span className="meta-icon" aria-hidden="true">📅</span>
+              {new Date(algorithm.createdAt).toLocaleDateString('ru-RU')}
+            </span>
           </div>
-        </div>
-      </div>
 
-      <div className="details-content">
-        <div className="main-content">
-          <section className="content-section">
-            <h2 className="section-title">Описание</h2>
-            <div className="description-text">
-              <p>{algorithm.description}</p>
+          <div className="details-inline">
+            <div className="detail-item">
+              <span className="detail-label">Тип</span>
+              <span className={`detail-value ${algorithm.isPaid ? 'paid' : 'free'}`}>
+                {algorithm.isPaid ? 'Платный' : 'Бесплатный'}
+              </span>
             </div>
-          </section>
-
-          {algorithm.isPaid && (
-            <PriceMonitorPanel
-              key={`${algorithm.id}-${priceChartNonce}-${algorithm.updatedAt}`}
-              algorithmId={algorithm.id}
-              currentPrice={algorithm.price}
-            />
-          )}
-
-          {showPaywall && (
-            <section className="content-section paywall-section">
-              <h2 className="section-title">Код алгоритма</h2>
-              <p className="paywall-note">
-                Исходный код этого алгоритма доступен после покупки. Оплата сейчас имитируется: при нажатии
-                «Купить» доступ открывается сразу.
-              </p>
-              {algorithm.price != null && (
-                <p className="paywall-price">{algorithm.price} ₽</p>
-              )}
-              {purchaseError && (
-                <div className="error-inline" style={{ color: '#c0392b', marginBottom: '0.75rem' }}>
-                  {purchaseError}
-                </div>
-              )}
-              {user ? (
-                <button
-                  type="button"
-                  className="buy-btn"
-                  onClick={handlePurchase}
-                  disabled={purchaseLoading}
-                >
-                  {purchaseLoading ? 'Обработка…' : `Купить за ${algorithm.price ?? '—'} ₽`}
-                </button>
-              ) : (
-                <p className="paywall-login">
-                  <Link to="/login">Войдите</Link>, чтобы купить алгоритм.
-                </p>
-              )}
-            </section>
-          )}
-
-          {showCodeBlock && (
-            <section className="content-section">
-              <div className="section-header">
-                <h2 className="section-title">Код алгоритма</h2>
-                <div className="code-meta">
-                  <span className="language-badge">{algorithm.language}</span>
-                  <span className="compiler-badge">{algorithm.compiler}</span>
-                </div>
-              </div>
-              <div className="code-container">
-                <button 
-                  className={`copy-btn ${isCopied ? 'copied' : ''}`}
-                  onClick={handleCopyCode}
-                  title="Копировать код"
-                >
-                  {isCopied ? (
-                    <>
-                      <span className="copy-icon"></span>
-                      Скопировано!
-                    </>
-                  ) : (
-                    <>
-                      <span className="copy-icon"></span>
-                      Копировать
-                    </>
-                  )}
-                </button>
-                <pre className="code-block">
-                  <code>{algorithm.code}</code>
-                </pre>
-              </div>
-
-              <div style={{ marginTop: '1rem' }}>
-                <h3 style={{ margin: '0 0 0.5rem 0' }}>Проверка запуска</h3>
-                <label htmlFor="stdin" style={{ display: 'block', marginBottom: 6 }}>
-                  Ввод (stdin)
-                </label>
-                <textarea
-                  id="stdin"
-                  value={stdinValue}
-                  onChange={(e) => setStdinValue(e.target.value)}
-                  rows={4}
-                  placeholder="То, что будет подано на stdin вашей программе"
-                  style={{ width: '100%', marginBottom: 12 }}
-                />
-
-                <button
-                  type="button"
-                  className="buy-btn"
-                  onClick={handleRun}
-                  disabled={runLoading}
-                  style={{ width: 'auto' }}
-                >
-                  {runLoading ? 'Запуск…' : 'Запустить'}
-                </button>
-
-                {runError && (
-                  <div className="error-inline" style={{ color: '#c0392b', marginTop: '0.75rem' }}>
-                    {runError}
-                  </div>
-                )}
-
-                {runResult && (
-                  <div
-                    style={{
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      borderRadius: 8,
-                      padding: 12,
-                      background: 'rgba(0,0,0,0.25)',
-                      marginTop: 12,
-                    }}
-                  >
-                    <div style={{ marginBottom: 8 }}>
-                      <strong>Результат:</strong>{' '}
-                      <span
-                        style={{
-                          color:
-                            runResult.compiled && runResult.ran ? '#27ae60' : '#c0392b',
-                        }}
-                      >
-                        {!runResult.compiled
-                          ? 'Ошибка компиляции'
-                          : runResult.ran
-                            ? 'Выполнено'
-                            : 'Ошибка выполнения'}
-                      </span>
-                    </div>
-
-                    {runResult.stderr && runResult.stderr.trim() && (
-                      <div style={{ marginBottom: 10 }}>
-                        <div style={{ fontWeight: 600, marginBottom: 6 }}>stderr</div>
-                        <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{runResult.stderr}</pre>
-                      </div>
-                    )}
-
-                    {runResult.stdout && runResult.stdout.trim() && (
-                      <div>
-                        <div style={{ fontWeight: 600, marginBottom: 6 }}>stdout</div>
-                        <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{runResult.stdout}</pre>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-        </div>
-
-        <aside className="sidebar">
-          <div className="info-card">
-            <h3 className="card-title">Детали алгоритма</h3>
-            
-            <div className="info-grid">
-              <div className="info-row">
-                <span className="info-label">Тип:</span>
-                <span className={`info-value ${algorithm.isPaid ? 'paid' : 'free'}`}>
-                  {algorithm.isPaid ? 'Платный' : 'Бесплатный'}
+            {algorithm.isPaid && algorithm.price && (
+              <div className="detail-item detail-price">
+                <span className="detail-label">Цена</span>
+                <span className="detail-value price">
+                  <span className="price-amount">{algorithm.price}</span>
+                  <span className="price-currency">₽</span>
                 </span>
               </div>
-              
-              {algorithm.isPaid && algorithm.price && (
-                <div className="info-row">
-                  <span className="info-label">Цена:</span>
-                  <span className="info-value price">{algorithm.price} руб.</span>
-                </div>
-              )}
-              
-              <div className="info-row">
-                <span className="info-label">Обновлен:</span>
-                <span className="info-value">
-                  {new Date(algorithm.updatedAt).toLocaleDateString('ru-RU')}
-                </span>
-              </div>
+            )}
+            <div className="detail-item">
+              <span className="detail-label">Обновлён</span>
+              <span className="detail-value">
+                {new Date(algorithm.updatedAt).toLocaleDateString('ru-RU')}
+              </span>
             </div>
           </div>
 
           {algorithm.tags.length > 0 && (
-            <div className="tags-card">
-              <h3 className="card-title">Теги</h3>
-              <div className="tags-container">
-                {algorithm.tags.map(tag => (
-                  <span key={tag} className="tag">{tag}</span>
-                ))}
-              </div>
+            <div className="tags-inline">
+              {algorithm.tags.map(tag => (
+                <span key={tag} className="tag">{tag}</span>
+              ))}
             </div>
           )}
-        </aside>
-      </div>
+        </div>
+      </header>
+
+      <main className="main-wide">
+        <section className="card description-card">
+          <h2 className="card-title">Описание</h2>
+          <p className="description-text">{algorithm.description}</p>
+        </section>
+
+        {algorithm.isPaid && (
+          <PriceMonitorPanel
+            key={`${algorithm.id}-${priceChartNonce}-${algorithm.updatedAt}`}
+            algorithmId={algorithm.id}
+            currentPrice={algorithm.price}
+          />
+        )}
+
+        {showPaywall && (
+          <section className="card paywall-card">
+            <h2 className="card-title">Исходный код</h2>
+            <p className="paywall-note">
+              Этот код доступен после покупки. Оплата сейчас имитируется: при нажатии «Купить» доступ открывается сразу.
+            </p>
+            {purchaseError && (
+              <div className="error-inline" role="alert">
+                {purchaseError}
+              </div>
+            )}
+            {user ? (
+              <button
+                type="button"
+                className="buy-btn"
+                onClick={handlePurchase}
+                disabled={purchaseLoading}
+              >
+                {purchaseLoading ? 'Обработка…' : `Купить за ${algorithm.price ?? '—'} ₽`}
+              </button>
+            ) : (
+              <p className="paywall-login">
+                <Link to="/login">Войдите</Link>, чтобы купить алгоритм.
+              </p>
+            )}
+          </section>
+        )}
+
+        {showCodeBlock && (
+          <section className="card code-card">
+            <div className="card-header">
+              <h2 className="card-title">Исходный код</h2>
+              <div className="code-meta">
+                <span className="lang-badge">{algorithm.language}</span>
+                <span className="compiler-badge">{algorithm.compiler}</span>
+              </div>
+            </div>
+            <div className="code-wrapper">
+              <button
+                className={`copy-btn ${isCopied ? 'copied' : ''}`}
+                onClick={handleCopyCode}
+                title="Копировать код"
+                aria-label={isCopied ? 'Код скопирован' : 'Копировать код'}
+              >
+                <span className="copy-icon" aria-hidden="true">{isCopied ? '✓' : '📋'}</span>
+                {isCopied ? 'Скопировано!' : 'Копировать'}
+              </button>
+              <pre className="code-block">
+                <code>{algorithm.code}</code>
+              </pre>
+            </div>
+
+            <div className="run-section">
+              <h3 className="run-title">Запуск алгоритма</h3>
+              <label htmlFor="stdin-input" className="stdin-label">
+                Стандартный ввод (stdin)
+              </label>
+              <textarea
+                id="stdin-input"
+                className="stdin-textarea"
+                value={stdinValue}
+                onChange={(e) => setStdinValue(e.target.value)}
+                rows={4}
+                placeholder="Введите данные, которые будут переданы программе"
+              />
+              <div className="run-actions">
+                <button
+                  type="button"
+                  className="run-btn"
+                  onClick={handleRun}
+                  disabled={runLoading}
+                >
+                  <span className="run-btn-icon" aria-hidden="true">▶</span>
+                  {runLoading ? 'Выполняется…' : 'Запустить код'}
+                </button>
+                {runError && (
+                  <div className="run-error" role="alert">
+                    {runError}
+                  </div>
+                )}
+              </div>
+
+              {runResult && (
+                <div className="run-result animate-fade-in">
+                  <div className="run-result-status">
+                    <strong>Результат:</strong>{' '}
+                    <span className={`run-status-badge ${
+                      runResult.compiled && runResult.ran ? 'success' : 'error'
+                    }`}>
+                      {!runResult.compiled
+                        ? 'Ошибка компиляции'
+                        : runResult.ran
+                          ? 'Выполнено'
+                          : 'Ошибка выполнения'}
+                    </span>
+                  </div>
+                  {runResult.stderr?.trim() && (
+                    <div className="run-output-block">
+                      <div className="run-output-label">stderr</div>
+                      <pre className="run-output-text">{runResult.stderr}</pre>
+                    </div>
+                  )}
+                  {runResult.stdout?.trim() && (
+                    <div className="run-output-block">
+                      <div className="run-output-label">stdout</div>
+                      <pre className="run-output-text">{runResult.stdout}</pre>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+      </main>
     </div>
   );
 };

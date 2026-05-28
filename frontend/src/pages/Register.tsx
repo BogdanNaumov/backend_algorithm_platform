@@ -15,12 +15,22 @@ const Register: React.FC = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const togglePassword2Visibility = () => {
+    setShowPassword2(!showPassword2);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,27 +109,49 @@ const Register: React.FC = () => {
             </div>
             <div className="form-group">
               <label htmlFor="password">Пароль</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={togglePasswordVisibility}
+                  disabled={loading}
+                  aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                >
+                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
             </div>
             <div className="form-group">
               <label htmlFor="password2">Подтверждение пароля</label>
-              <input
-                type="password"
-                id="password2"
-                name="password2"
-                value={formData.password2}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword2 ? 'text' : 'password'}
+                  id="password2"
+                  name="password2"
+                  value={formData.password2}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={togglePassword2Visibility}
+                  disabled={loading}
+                  aria-label={showPassword2 ? 'Скрыть пароль' : 'Показать пароль'}
+                >
+                  {showPassword2 ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
             </div>
             <button type="submit" disabled={loading} className="auth-button">
               {loading ? 'Регистрация...' : 'Зарегистрироваться'}

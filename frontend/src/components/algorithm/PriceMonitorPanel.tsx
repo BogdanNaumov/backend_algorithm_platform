@@ -3,11 +3,12 @@ import { apiService } from '../../services/api';
 import type { PriceHistoryPoint } from '../../types';
 import '../../styles/components/PriceMonitorPanel.css';
 
-const W = 640;
-const H = 220;
+const W = 420;
+const H = 100; // компактнее
+
 const PAD_L = 48;
-const PAD_R = 16;
-const PAD_T = 24;
+const PAD_R = 20;
+const PAD_T = 28;
 const PAD_B = 40;
 
 interface PriceMonitorPanelProps {
@@ -20,7 +21,7 @@ const PriceMonitorPanel: React.FC<PriceMonitorPanelProps> = ({ algorithmId, curr
   const [points, setPoints] = useState<PriceHistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,25 +37,24 @@ const PriceMonitorPanel: React.FC<PriceMonitorPanelProps> = ({ algorithmId, curr
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [algorithmId]);
 
   const geom = useMemo(() => {
     if (!points.length) return null;
-    const sorted = [...points].sort(
-      (a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()
+    const sorted = [...points].sort((a, b) => 
+      new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()
     );
-    const ts = sorted.map((p) => new Date(p.recordedAt).getTime());
-    const prices = sorted.map((p) => p.price);
+    
+    const ts = sorted.map(p => new Date(p.recordedAt).getTime());
+    const prices = sorted.map(p => p.price);
     const t0 = ts[0];
     const t1 = ts[ts.length - 1];
     const minP = Math.min(...prices);
     const maxP = Math.max(...prices);
     const spanT = Math.max(t1 - t0, 1);
     const spanP = Math.max(maxP - minP, 1);
-    const padP = spanP * 0.08;
+    const padP = spanP * 0.12;
     const low = minP - padP;
     const high = maxP + padP;
     const rangeP = Math.max(high - low, 1);
@@ -62,6 +62,7 @@ const PriceMonitorPanel: React.FC<PriceMonitorPanelProps> = ({ algorithmId, curr
     const xOf = (t: number) => PAD_L + ((t - t0) / spanT) * (W - PAD_L - PAD_R);
     const yOf = (pr: number) => PAD_T + (1 - (pr - low) / rangeP) * (H - PAD_T - PAD_B);
 
+    // Основная линия
     const pathD = sorted
       .map((p, i) => {
         const x = xOf(new Date(p.recordedAt).getTime());
@@ -70,13 +71,25 @@ const PriceMonitorPanel: React.FC<PriceMonitorPanelProps> = ({ algorithmId, curr
       })
       .join(' ');
 
-    const dots = sorted.map((p) => ({
+    // Рёбра между точками
+    const ribs = [];
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = sorted[i - 1];
+      const curr = sorted[i];
+      const x1 = xOf(new Date(prev.recordedAt).getTime());
+      const y1 = yOf(prev.price);
+      const x2 = xOf(new Date(curr.recordedAt).getTime());
+      const y2 = yOf(curr.price);
+      ribs.push({ x1, y1, x2, y2, key: `${prev.recordedAt}-${curr.recordedAt}` });
+    }
+
+    const dots = sorted.map(p => ({
       x: xOf(new Date(p.recordedAt).getTime()),
       y: yOf(p.price),
       key: `${p.recordedAt}-${p.price}`,
     }));
 
-    return { pathD, dots, sorted };
+    return { pathD, dots, sorted, ribs };
   }, [points]);
 
   return (
@@ -108,57 +121,69 @@ const PriceMonitorPanel: React.FC<PriceMonitorPanelProps> = ({ algorithmId, curr
           {err && <p className="price-monitor-error">{err}</p>}
           {!loading && !err && points.length === 0 && (
             <p className="price-monitor-muted">
-              История изменений цены пока пуста. Точки появятся при изменении цены автором после
-              публикации.
+              История изменений цены пока пуста. Точки появятся при изменении цены автором после публикации.
             </p>
           )}
+
           {!loading && !err && geom && (
             <div className="price-chart-wrap">
-              <svg
-                className="price-chart-svg"
-                viewBox={`0 0 ${W} ${H}`}
-                preserveAspectRatio="xMidYMid meet"
-                role="img"
-                aria-label="График изменения цены"
-              >
-                <defs>
-                  <linearGradient id={lineGradId} x1="0" x2="1" y1="0" y2="0">
-                    <stop offset="0%" stopColor="#667eea" />
-                    <stop offset="100%" stopColor="#764ba2" />
-                  </linearGradient>
-                </defs>
-                <rect x="0" y="0" width={W} height={H} fill="#f8fafc" rx="8" />
-                <path
-                  d={geom.pathD}
-                  fill="none"
-                  stroke={`url(#${lineGradId})`}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {geom.dots.map(({ x, y, key }) => (
-                  <circle key={key} cx={x} cy={y} r="5" fill="#fff" stroke="#667eea" strokeWidth="2" />
-                ))}
-              </svg>
-              <ul className="price-chart-legend">
-                {geom.sorted
-                  .slice()
-                  .reverse()
-                  .slice(0, 8)
-                  .map((p) => (
-                    <li key={`${p.recordedAt}-${p.price}`}>
-                      <time dateTime={p.recordedAt}>
-                        {new Date(p.recordedAt).toLocaleString('ru-RU', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </time>
-                      <span>{p.price} ₽</span>
-                    </li>
+              <div className="price-chart-container">
+                <svg
+                  className="price-chart-svg"
+                  width={W}
+                  height={H}
+                  viewBox={`0 0 ${W} ${H}`}
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  <defs>
+                    <linearGradient id={lineGradId} x1="0" x2="1" y1="0" y2="0">
+                      <stop offset="0%" stopColor="#6366f1" />
+                      <stop offset="100%" stopColor="#8b5cf6" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="0" y="0" width={W} height={H} fill="transparent" rx="8" />
+                  {/* Рёбра между точками */}
+                  {geom.ribs.map(rib => (
+                    <line key={rib.key} x1={rib.x1} y1={rib.y1} x2={rib.x2} y2={rib.y2} stroke="#64748b" strokeWidth={1.2} />
                   ))}
+                  {/* Основная линия */}
+                  <path
+                    d={geom.pathD}
+                    fill="none"
+                    stroke={`url(#${lineGradId})`}
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* Точки */}
+                  {geom.dots.map(({ x, y, key }) => (
+                    <circle 
+                      key={key} 
+                      cx={x} 
+                      cy={y} 
+                      r="5.5" 
+                      fill="#fff" 
+                      stroke="#4f46e5" 
+                      strokeWidth="3" 
+                    />
+                  ))}
+                </svg>
+              </div>
+              <ul className="price-chart-legend">
+                {geom.sorted.slice().reverse().slice(0, 8).map((p) => (
+                  <li key={`${p.recordedAt}-${p.price}`}>
+                    <time dateTime={p.recordedAt}>
+                      {new Date(p.recordedAt).toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </time>
+                    <span>{p.price} ₽</span>
+                  </li>
+                ))}
               </ul>
             </div>
           )}
