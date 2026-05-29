@@ -14,11 +14,11 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e1e5e9;
+  border-bottom: 2px solid var(--border);
 }
 
 .profile-header h1 {
-  color: #2c3e50;
+  color: var(--text);
   margin: 0;
 }
 
@@ -38,12 +38,12 @@
 }
 
 .error-message {
-  background: #ffeaea;
-  color: #e74c3c;
+  background: var(--error-bg);
+  color: var(--error-text);
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 2rem;
-  border: 1px solid #ffcdd2;
+  border: 1px solid rgba(231, 76, 60, 0.35);
 }
 
 .profile-tabs {
@@ -52,7 +52,7 @@
   gap: 0.5rem;
   margin-bottom: 1.5rem;
   padding: 0.25rem;
-  background: #eef2f7;
+  background: var(--surface);
   border-radius: 12px;
   width: 100%;
   box-sizing: border-box;
@@ -65,7 +65,7 @@
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: #64748b;
+  color: var(--muted);
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
@@ -109,14 +109,14 @@
 }
 
 .profile-tab:hover {
-  color: #2c3e50;
-  background: rgba(255, 255, 255, 0.5);
+  color: var(--text);
+  background: rgba(86, 156, 214, 0.08);
 }
 
 .profile-tab.active {
-  background: white;
-  color: #3498db;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 4px var(--shadow);
 }
 
 .profile-content {
@@ -127,19 +127,20 @@
 
 .profile-info-section,
 .algorithms-section {
-  background: white;
+  background: var(--surface);
+  color: var(--text);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
 }
 
 .profile-info-section h2,
 .algorithms-section h2 {
-  color: #2c3e50;
+  color: var(--text);
   margin-top: 0;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #ecf0f1;
+  border-bottom: 1px solid var(--border);
 }
 
 .info-section {
@@ -147,7 +148,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 0;
-  border-bottom: 1px solid #f8f9fa;
+  border-bottom: 1px solid var(--border);
 }
 
 .info-section:last-child {
@@ -156,17 +157,17 @@
 
 .info-section label {
   font-weight: 600;
-  color: #555;
+  color: var(--text);
 }
 
 .info-section span {
-  color: #2c3e50;
+  color: var(--text);
   font-weight: 500;
 }
 
 .edit-btn,
 .save-btn {
-  background: #3498db;
+  background: var(--accent);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -179,11 +180,11 @@
 
 .edit-btn:hover,
 .save-btn:hover {
-  background: #2980b9;
+  background: var(--btn-hover);
 }
 
 .cancel-btn {
-  background: #95a5a6;
+  background: var(--muted);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -195,7 +196,7 @@
 }
 
 .cancel-btn:hover {
-  background: #7f8c8d;
+  background: rgba(86, 156, 214, 0.5);
 }
 
 .edit-form {
@@ -212,7 +213,7 @@
 
 .form-group label {
   font-weight: 600;
-  color: #555;
+  color: var(--text);
 }
 
 .form-group input {
@@ -264,17 +265,17 @@
 .unauthorized-icon {
   font-size: 5rem;
   margin-bottom: 1rem;
-  color: #94a3b8;
+  color: var(--accent);
 }
 
 .unauthorized-content h1 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  color: #1a202c;
+  color: var(--text);
 }
 
 .unauthorized-message {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 1.05rem;
   margin-bottom: 2rem;
   line-height: 1.6;
@@ -310,13 +311,13 @@
 }
 
 .auth-btn.secondary {
-  background: white;
-  color: #6366f1;
-  border: 2px solid #6366f1;
+  background: var(--surface);
+  color: var(--accent);
+  border: 2px solid var(--accent);
 }
 
 .auth-btn.secondary:hover {
-  background: #f5f3ff;
+  background: var(--surface-strong);
 }
 
 .unauthorized-features {

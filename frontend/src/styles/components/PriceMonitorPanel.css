@@ -1,6 +1,6 @@
 .price-monitor-panel {
-  background: linear-gradient(135deg, #f8fafc 0%, #f0f4ff 100%);
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem 1.6rem;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.08);
@@ -19,19 +19,19 @@
   margin: 0 0 0.4rem 0;
   font-size: 1.32rem;
   font-weight: 700;
-  color: #1e2937;
+  color: var(--text);
 }
 
 .price-monitor-sub {
   margin: 0;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.96rem;
 }
 
 .price-monitor-toggle {
-  background: white;
-  border: 1px solid #cbd5e1;
-  color: #475569;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
   padding: 0.55rem 1.1rem;
   border-radius: 10px;
   font-weight: 600;
@@ -47,13 +47,13 @@
 }
 
 .price-chart-container {
-  border: 4px solid #334155 !important;   /* тёмная и толстая рамка */
+  border: 4px solid var(--border) !important;
   border-radius: 12px;
   overflow: hidden;
   background: 
-    linear-gradient(#e2e8f0 1px, transparent 1px),
-    linear-gradient(90deg, #e2e8f0 1px, transparent 1px),
-    #ffffff;
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px),
+    var(--surface);
   background-size: 20px 20px;
 }
 
@@ -71,8 +71,8 @@
 }
 
 .price-chart-svg circle {
-  fill: #fff;
-  stroke: #4f46e5;
+  fill: var(--surface);
+  stroke: var(--accent);
   stroke-width: 3;
 }
 
@@ -82,5 +82,5 @@
   margin: 0;
   padding: 0;
   font-size: 0.83rem;
-  color: #475569;
+  color: var(--text-secondary);
 }

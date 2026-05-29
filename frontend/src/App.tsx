@@ -24,7 +24,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 // Создаем отдельный компонент для основного контента, который использует useLocation
-function AppContent() {
+function AppContent({ isDarkMode, onToggleTheme }: { isDarkMode: boolean; onToggleTheme: () => void }) {
   const [activeTab, setActiveTab] = useState('/');
   const location = useLocation();
   const { user } = useAuth();
@@ -82,15 +82,30 @@ function AppContent() {
   return (
     <div className="app-shell">
       <nav className="navbar">
-        <div className="nav-brand">
-          <Link to="/">AlgoPlatform</Link>
+        <div className="nav-left">
+          <div className="nav-brand">
+            <Link to="/">AlgoPlatform</Link>
+          </div>
+          <div className="nav-actions nav-actions-inline">
+            <label className="toggle-switch theme-switcher">
+              <input
+                type="checkbox"
+                checked={isDarkMode}
+                onChange={onToggleTheme}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+            <span className="theme-label">{isDarkMode ? 'Тёмная тема' : 'Светлая тема'}</span>
+          </div>
         </div>
-        <div className="nav-links">
-          <motion.div 
-            className={`nav-item ${activeTab === '/' ? 'active' : ''}`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+
+        <div className="nav-right">
+          <div className="nav-links">
+            <motion.div 
+              className={`nav-item ${activeTab === '/' ? 'active' : ''}`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
             <Link to="/" onClick={() => setActiveTab('/')}>
               <motion.span
                 variants={tabVariants}
@@ -195,6 +210,7 @@ function AppContent() {
             </motion.div>
           )}
         </div>
+      </div>
       </nav>
 
       <main className="app-main">
@@ -323,10 +339,20 @@ function AppContent() {
 
 // Основной компонент App теперь оборачивает в AuthProvider и Router
 function App() {
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    document.body.classList.toggle('dark', isDarkMode);
+    window.localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
   return (
     <AuthProvider>
       <Router>
-        <AppContent />
+        <AppContent isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((prev) => !prev)} />
       </Router>
     </AuthProvider>
   );
