@@ -5,6 +5,8 @@ import { apiService } from '../services/api';
 import { ModeratedAlgorithm } from '../types';
 import { ALGORITHM_STATUS_DISPLAY, ALGORITHM_STATUS_COLORS } from '../utils/constants';
 import { hasModerationAccess, getUserRoleDisplay } from '../utils/authUtils';
+import SafeCodeViewer from '../components/common/SafeCodeViewer';
+import ModalPortal from '../components/common/ModalPortal';
 import '../styles/pages/Moderation.css';
 
 const Moderation: React.FC = () => {
@@ -19,12 +21,26 @@ const Moderation: React.FC = () => {
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
   const [detailsViewOpen, setDetailsViewOpen] = useState(false);
   const [selectedAlgorithmForDetails, setSelectedAlgorithmForDetails] = useState<ModeratedAlgorithm | null>(null);
+  const [isDark, setIsDark] = useState<boolean>(() => typeof document !== 'undefined' && document.body.classList.contains('dark'));
   
   const { user } = useAuth();
 
   useEffect(() => {
     fetchModerationAlgorithms();
   }, [activeTab]);
+
+  useEffect(() => {
+    if (typeof MutationObserver === 'undefined') return;
+    const obs = new MutationObserver(() => {
+      setIsDark(document.body.classList.contains('dark'));
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    console.log('[Moderation] detailsViewOpen=', detailsViewOpen, 'selected=', selectedAlgorithmForDetails?.id);
+  }, [detailsViewOpen, selectedAlgorithmForDetails]);
 
   const fetchModerationAlgorithms = async () => {
     try {
@@ -80,11 +96,13 @@ const Moderation: React.FC = () => {
   };
 
   const handleOpenDetails = (algorithm: ModeratedAlgorithm) => {
+    console.log('[Moderation] handleOpenDetails:', algorithm?.id);
     setSelectedAlgorithmForDetails(algorithm);
     setDetailsViewOpen(true);
   };
 
   const handleCloseDetails = () => {
+    console.log('[Moderation] handleCloseDetails');
     setDetailsViewOpen(false);
     setSelectedAlgorithmForDetails(null);
   };
@@ -243,8 +261,9 @@ const Moderation: React.FC = () => {
 
       {/* Диалог модерации */}
       {moderationDialogOpen && selectedAlgorithm && (
-        <div className="modal-overlay">
-          <div className="moderation-modal">
+        <ModalPortal>
+          <div className="modal-overlay">
+            <div className="moderation-modal">
             <div className="modal-header">
               <h3 className="modal-title">
                 {actionType === 'approve' ? 'Одобрение алгоритма' : 'Отклонение алгоритма'}
@@ -310,16 +329,20 @@ const Moderation: React.FC = () => {
                 {actionType === 'approve' ? 'Да, одобрить' : 'Отклонить'}
               </button>
             </div>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Модальное окно для просмотра деталей */}
       {detailsViewOpen && selectedAlgorithmForDetails && (
-        <AlgorithmDetailsModal 
-          algorithm={selectedAlgorithmForDetails}
-          onClose={handleCloseDetails}
-        />
+        <ModalPortal>
+          <AlgorithmDetailsModal 
+            algorithm={selectedAlgorithmForDetails}
+            onClose={handleCloseDetails}
+            isDark={isDark}
+          />
+        </ModalPortal>
       )}
     </div>
   );
@@ -365,15 +388,15 @@ const AlgorithmCard: React.FC<{
       
       <div className="card-details">
         <div className="detail-item">
-          <span className="detail-label">Автор</span>
+          <span className="detail-label">автор</span>
           <span className="detail-value">{algorithm.author_name}</span>
         </div>
         <div className="detail-item">
-          <span className="detail-label">Компилятор</span>
+          <span className="detail-label">компилятор</span>
           <span className="detail-value">{algorithm.compiler}</span>
         </div>
         <div className="detail-item">
-          <span className="detail-label">Код</span>
+          <span className="detail-label">код</span>
           <span className="detail-value">{algorithm.code?.length || 0} символов</span>
         </div>
       </div>
@@ -436,7 +459,8 @@ const AlgorithmCard: React.FC<{
 const AlgorithmDetailsModal: React.FC<{
   algorithm: ModeratedAlgorithm;
   onClose: () => void;
-}> = ({ algorithm, onClose }) => {
+  isDark: boolean;
+}> = ({ algorithm, onClose, isDark }) => {
   const [stdinValue, setStdinValue] = useState('');
   const [runLoading, setRunLoading] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
@@ -527,9 +551,9 @@ const AlgorithmDetailsModal: React.FC<{
 
           <div className="details-section">
             <h3 className="details-heading">Код</h3>
-            <pre className="code-preview">
-              <code>{algorithm.code}</code>
-            </pre>
+            <div style={{ marginBottom: 12 }}>
+              <SafeCodeViewer code={algorithm.code ?? ''} language={algorithm.language} height="220px" isDark={isDark} />
+            </div>
           </div>
 
           <div className="run-section">

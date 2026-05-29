@@ -4,6 +4,7 @@ import { apiService } from '../services/api';
 import { ModeratedAlgorithm } from '../types';
 import { useAuth } from '../stores/AuthContext';
 import PriceMonitorPanel from '../components/algorithm/PriceMonitorPanel';
+import SafeCodeViewer from '../components/common/SafeCodeViewer';
 import '../styles/pages/AlgorithmDetails.css';
 
 const AlgorithmDetails: React.FC = () => {
@@ -26,6 +27,7 @@ const AlgorithmDetails: React.FC = () => {
     stdout?: string;
     stderr?: string;
   } | null>(null);
+  const [isDark, setIsDark] = useState<boolean>(() => typeof document !== 'undefined' && document.body.classList.contains('dark'));
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -44,6 +46,15 @@ const AlgorithmDetails: React.FC = () => {
     };
     fetchAlgorithm();
   }, [id, user?.username]);
+
+  useEffect(() => {
+    if (typeof MutationObserver === 'undefined') return;
+    const obs = new MutationObserver(() => {
+      setIsDark(document.body.classList.contains('dark'));
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
 
   const handlePurchase = async () => {
     if (!id || !user) return;
@@ -246,9 +257,9 @@ const AlgorithmDetails: React.FC = () => {
                 <span className="copy-icon" aria-hidden="true">{isCopied ? '✓' : '📋'}</span>
                 {isCopied ? 'Скопировано!' : 'Копировать'}
               </button>
-              <pre className="code-block">
-                <code>{algorithm.code}</code>
-              </pre>
+              {algorithm && (
+                <SafeCodeViewer code={algorithm.code ?? ''} language={algorithm.language} height="300px" isDark={isDark} />
+              )}
             </div>
 
             <div className="run-section">

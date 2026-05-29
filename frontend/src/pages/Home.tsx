@@ -202,7 +202,6 @@ const AlgorithmCard: React.FC<{ algorithm: ModeratedAlgorithm }> = ({ algorithm 
             <span className="card-date">
               {new Date(algorithm.createdAt).toLocaleDateString('ru-RU')}
             </span>
-            <span className="status-badge approved">Одобрено</span>
           </div>
         </div>
         <div className="card-badges">
@@ -217,11 +216,11 @@ const AlgorithmCard: React.FC<{ algorithm: ModeratedAlgorithm }> = ({ algorithm 
       
       <div className="card-details">
         <div className="detail-item">
-          <span className="detail-label">Автор</span>
+          <span className="detail-label">автор</span>
           <span className="detail-value">{algorithm.author_name}</span>
         </div>
         <div className="detail-item">
-          <span className="detail-label">Компилятор</span>
+          <span className="detail-label">компилятор</span>
           <span className="detail-value">{algorithm.compiler}</span>
         </div>
       </div>

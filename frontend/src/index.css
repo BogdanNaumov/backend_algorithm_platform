@@ -37,6 +37,7 @@
   --warning: #d97706;
   --font-sans: 'Inter', 'Open Sans', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --code-bg: #f6f8fa;
 }
 
 html {
@@ -84,6 +85,7 @@ body.dark {
   --warning: #f59e0b;
   --font-sans: 'Inter', 'Open Sans', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --code-bg: #0f1720;
 }
 
 #root {
@@ -123,6 +125,21 @@ body.dark {
   flex-direction: column;
   min-height: 0;
   width: 100%;
+}
+
+/* CodeMirror global tweaks to respect theme tokens */
+.cm-editor, .cm-editor .cm-scroller {
+  background: var(--code-bg) !important;
+  color: var(--text) !important;
+}
+.cm-editor .cm-gutters {
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  border-right: 1px solid var(--border);
+}
+.cm-content {
+  font-family: var(--font-mono) !important;
+  line-height: 1.6 !important;
 }
 
 /* ===== НАВИГАЦИЯ ===== */
